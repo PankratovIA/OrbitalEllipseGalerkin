@@ -7,13 +7,14 @@ class Quaternion:
 
     def __init__(self, variable_list):
         checkList = False
-        if isinstance(variable_list, type(list())):
-            for i in variable_list:
-                if not (isinstance(i, int) or isinstance(i, float)):
-                    checkList = True
-                    break
-        if len(variable_list) != 4 or checkList:
-            raise SystemExit("Wrong Quaternion", variable_list)
+        # if isinstance(variable_list, type(list())):
+        #     for i in variable_list:
+        #         if not (isinstance(i, int) or isinstance(i, float)):
+        #             checkList = True
+        #             break
+                
+        # if len(variable_list) != 4 or checkList:
+        #     raise SystemExit("Wrong Quaternion", variable_list)
         self.var = variable_list
 
     def getConjugate(self):
@@ -22,7 +23,7 @@ class Quaternion:
     def getInv(self):
         conj = self.getConjugate()
         # norm = self.getNorm()
-        return conj * Quaternion([self.getNorm(), 0, 0, 0])
+        return conj * Quaternion([1.0 / self.getNorm(), 0, 0, 0])
 
     def __add__(self, other):
         # print("other", other)
@@ -128,21 +129,21 @@ def main():
     print("difference: a - b =", a - b)
     print("addition: a + b =", a + b)
     print("multiplication: a * b =", a * b)
-    # print("check multiplication with norm: a * b =", Quaternion(a * b).getNorm())
-    # print("division: a / b =", a / b)
-    # print("check division with norm: a / b =", Quaternion(a / b).getNorm())
-    # print("check division: a / b * b =", Quaternion(a / b) * b)
+    print("check multiplication with norm: a * b =", Quaternion(a * b).getNorm())
+    print("division: a / b =", a / b)
+    print("check division with norm: a / b =", Quaternion(a / b).getNorm())
+    print("check division: a / b * b =", Quaternion(a / b) * b)
     print("trigonometrical form a: ", a.getTrigonometrical())
     print("a conjure = ", a.getConjugate())
     print("b conjure = ", b.getConjugate())
     print("norm a =", a.getNorm())
     print("norm b =", b.getNorm())
-    var_turn = turn_coordinate(90, [0, 0, 1], [0, 1, 0])
-    print('turn coordinate system 1 = ', var_turn)
-    print('turn coordinate system 2 = ', turn_coordinate(90, var_turn, [0, 0, 1]))
-    var_turn = turn_vector(90, [0, 0, 1], [0, 1, 0])
-    print('turn vector 1 = ', var_turn)
-    print('turn vector 2 = ', turn_vector(90, var_turn, [0, 0, 1]))
+    # var_turn = turn_coordinate(90, [0, 0, 1], [0, 1, 0])
+    # print('turn coordinate system 1 = ', var_turn)
+    # print('turn coordinate system 2 = ', turn_coordinate(90, var_turn, [0, 0, 1]))
+    # var_turn = turn_vector(90, [0, 0, 1], [0, 1, 0])
+    # print('turn vector 1 = ', var_turn)
+    # print('turn vector 2 = ', turn_vector(90, var_turn, [0, 0, 1]))
 
 
 if __name__ == '__main__':

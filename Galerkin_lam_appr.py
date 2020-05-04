@@ -5,9 +5,11 @@ from MathematicModels import Quaternion
 from scipy.integrate import quad
 
 ez = 0.
-T = 2 * pi
+T = 0.1
 N = 1
-lam0 = Quaternion([1.0, 0, 0, 0])
+# lam0 = Quaternion([1, 0, 0, 0])
+# lam0 = Quaternion([0.8, 0, 0.6, 0])
+lam0 = Quaternion([1, 2, 3, 4]) * Quaternion([1/(30.0)**0.5, 0, 0, 0])
 Nb = 0.35
     
 
@@ -15,10 +17,12 @@ def r(phi):
     return 1.0 / (1.0 + ez * cos(phi))
 
 def Nk(phi, k):
-    return phi ** k
+    # return phi ** k
+    return sin((pi * k * phi) / (2 * T))
     
 def dNk(phi, k):
-    return k * (phi ** (k-1))
+    # return k * (phi ** (k-1))
+    return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
 
 def lam(a, phi):
     ans = lam0
@@ -34,7 +38,8 @@ def lam(a, phi):
 def fvect(phi, s, idx):
     assert(0<=idx<4)
     # print("s = ", s, "idx = ", idx)
-    omega = Quaternion([0, Nb * r(phi), 0, 1.0])
+    r3 = r(phi) ** 3.0
+    omega = Quaternion([0, Nb * r3, 0, 1.0])
     ans = lam0 * omega * Quaternion([Nk(phi, s+1), 0, 0, 0])
     # print(ans[idx])
     return ans[idx]
@@ -45,8 +50,11 @@ def Kvect(phi, s, k, idx):
     
     ans = Quaternion([2 * dNk(phi, k), 0, 0, 0])
     
-    omega = Quaternion([0, Nb * r(phi), 0, 1.0])
-    ans = ans - omega * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    r3 = r(phi) ** 3.0
+    omega = Quaternion([0, Nb * r3, 0, 1.0])
+    
+    ans = ans - omega * Quaternion([Nk(phi, k+1), 0, 0, 0])
+    ans = ans * Quaternion([Nk(phi, s+1), 0, 0, 0])
     # print(ans[idx])
     return ans[idx]
     
@@ -80,7 +88,15 @@ if __name__ == "__main__":
     
     assert(N == 1)
     
-    # a1 = 
+    a = K[0][0].getInv()
+    print("Inv check (1, 0, 0, 0) =", a * K[0][0])
+    
+    a = f[0] * a 
+    print("a =", a)
+    
+    print("lam0 = ", lam0, lam0.getNorm())
+    print("lam(0) = ", lam([a], 0))
+    print("lam(T) = ", lam([a], T), lam([a], T).getNorm())
     
     print("Galerkin <<<")    
 
