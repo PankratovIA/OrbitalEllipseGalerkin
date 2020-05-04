@@ -12,6 +12,25 @@ N = 1
 lam0 = Quaternion([1, 2, 3, 4]) * Quaternion([1/(30.0)**0.5, 0, 0, 0])
 Nb = 0.35
     
+def lamCircle(phi):
+    omega = Quaternion([0, Nb, 0, 1.0])
+    om = (1 + Nb * Nb) ** 0.5
+    
+    omega = omega * Quaternion([sin(0.5 * om * phi)/om, 0, 0, 0])
+    ans = Quaternion([cos(0.5 * om * phi), 0, 0, 0])
+    ans = ans + omega
+    ans = lam0 * ans
+    return ans
+    
+def dlamCircle(phi):
+    omega = Quaternion([0, Nb, 0, 1.0])
+    om = (1 + Nb * Nb) ** 0.5
+    omega = omega * Quaternion([0.5*cos(0.5 * om * phi), 0, 0, 0])
+    ans = Quaternion([-0.5 * om * sin(0.5 * om * phi), 0, 0, 0])
+    ans = ans + omega
+    ans = lam0 * ans
+    return ans
+    
 
 def r(phi):
     return 1.0 / (1.0 + ez * cos(phi))
