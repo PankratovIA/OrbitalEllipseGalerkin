@@ -6,7 +6,7 @@ from scipy.integrate import quad
 
 ez = 0.
 T = 2 * pi
-N = 2
+N = 1
 lam0 = Quaternion([1.0, 0, 0, 0])
 Nb = 0.35
     
@@ -39,10 +39,17 @@ def fvect(phi, s, idx):
     # print(ans[idx])
     return ans[idx]
     
-def f_s(s):
-    ans = [ quad(fvect, 0, T,args=(s, idx)) for idx in range(4) ] 
-    return Quaternion(ans)
-
+def Kvect(phi, s, k, idx):
+    assert(0<=idx<4)
+    # print("s = ", s, "idx = ", idx)
+    
+    ans = Quaternion([2 * dNk(phi, k), 0, 0, 0])
+    
+    omega = Quaternion([0, Nb * r(phi), 0, 1.0])
+    ans = ans - omega * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    # print(ans[idx])
+    return ans[idx]
+    
 if __name__ == "__main__":
     print("Galerkin >>>")    
     print(r(3.14))
@@ -50,14 +57,15 @@ if __name__ == "__main__":
     print(lam([Quaternion([1, 0, 0, 0]), Quaternion([0, 1, 1, 1])], pi/2))
     
     K = [[Quaternion([0, 0, 0, 0]) for _ in range(N)] for _ in range(N)]
-    print("K =", K)
+    #print("K =", K)
     
     for s in range(N):
         for k in range(N):
-            pass
+            K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
+            print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
     
     f = [Quaternion([0, 0, 0, 0]) for _ in range(N)]
-    print("f =", f)
+    # print("f =", f)
     print("---")
     for s in range(N):
         # res = [ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ]
@@ -69,6 +77,10 @@ if __name__ == "__main__":
     
     # lam0[0] = 9
     # print(lam0)
+    
+    assert(N == 1)
+    
+    # a1 = 
     
     print("Galerkin <<<")    
 
