@@ -59,7 +59,9 @@ def fvect(phi, s, idx):
     # print("s = ", s, "idx = ", idx)
     r3 = r(phi) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
-    ans = lam0 * omega * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    ans = lamCircle(phi) * omega - Quaternion([2.0, 0, 0, 0]) * dlamCircle(phi)
+    
+    ans = ans * Quaternion([Nk(phi, s+1), 0, 0, 0])
     # print(ans[idx])
     return ans[idx]
     
