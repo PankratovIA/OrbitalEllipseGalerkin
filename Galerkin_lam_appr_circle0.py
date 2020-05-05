@@ -44,7 +44,7 @@ def dNk(phi, k):
     return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
 
 def lam(a, phi):
-    ans = lam0
+    ans = lamCircle(phi)
     for k in range(len(a)):
         # print("ak", a[k])
         # Nkq = Quaternion([Nk(phi, k+1), 0, 0, 0])
