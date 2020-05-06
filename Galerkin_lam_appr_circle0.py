@@ -38,10 +38,12 @@ def r(phi):
 def Nk(phi, k):
     # return phi ** k
     return sin((pi * k * phi) / (2 * T))
+    # return sin((k * phi) / (2 * T))
     
 def dNk(phi, k):
     # return k * (phi ** (k-1))
     return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
+    # return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
 
 def lam(a, phi):
     ans = lamCircle(phi)
