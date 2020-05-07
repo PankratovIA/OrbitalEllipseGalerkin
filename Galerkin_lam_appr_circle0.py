@@ -2,12 +2,13 @@ from math import sin, cos, pi
 import numpy as np
 from MathematicModels import Quaternion
 from Gauss import solveLinear
+from copy import deepcopy
 from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
 ez = 0.01
-T = 4*pi
-N = 1
+T = 2*pi / 10
+N = 3
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4]) * Quaternion([1/(30.0)**0.5, 0, 0, 0])
@@ -38,13 +39,16 @@ def r(phi):
 
 def Nk(phi, k):
     # return phi ** k
-    return sin((pi * k * phi) / (2 * T))
+    # return sin((pi * k * phi) / (2 * T))
     # return sin((k * phi) / (2 * T))
+    return (r(phi) - r(0)) ** k
     
 def dNk(phi, k):
     # return k * (phi ** (k-1))
-    return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
+    # return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
     # return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
+    return k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
+
 
 def lam(a, phi):
     ans = lamCircle(phi)
@@ -122,22 +126,24 @@ if __name__ == "__main__":
     # lam0[0] = 9
     # print(lam0)
     
-    assert(N == 1)
+    #assert(N == 1)
+    print("N =", N)
     
-    a = K[0][0].getInv()
-    print("Inv check (1, 0, 0, 0) =", a * K[0][0])
-    
-    a = f[0][0] * a 
-    # a = Quaternion([0, 0, 0, 0])
-    print("a =", a)
+    # a = K[0][0].getInv()
+    # print("Inv check (1, 0, 0, 0) =", a * K[0][0])
+    # 
+    # a = f[0][0] * a 
+    # print("a =", a)
     
     aGauss = solveLinear(K, f)
     for idx, elem in enumerate(aGauss):
         print("aGauss[{0}] = {1}".format(idx, list(map(str, elem))))
+    a = deepcopy(aGauss[0])
+    print("a =", list(map(str,a)))
     
     print("lam0 = ", lam0, lam0.getNorm())
-    print("lam(0) = ", lam([a], 0))
-    print("lam(T) = ", lam([a], T), lam([a], T).getNorm())
+    print("lam(0) = ", lam(a, 0))
+    print("lam(T) = ", lam(a, T), lam(a, T).getNorm())
     
     #Cauchy
     # circle [0.031046560091828313, 0.031103992683832533, 0.031161212781716421, 0.031218202529294029, 0.031274944260239294]
@@ -151,11 +157,11 @@ if __name__ == "__main__":
     lastQ = Quaternion(sol[-1])
     print(lastQ, lastQ.getNorm())
     
-    print(lam([a], T), lam([a], T).getNorm())
+    print(lam(a, T), lam(a, T).getNorm())
     
     err = []
     for cur in zip(phi, sol):
-        l = lam([a], cur[0])
+        l = lam(a, cur[0])
         diff = Quaternion(cur[1]) - l
         err.append(diff.getNorm() ** .5)
         

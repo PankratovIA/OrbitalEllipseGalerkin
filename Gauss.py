@@ -32,13 +32,17 @@ def printQuatMatr(a):
         print("  ".join(map(str,row)))
         
 def solveLinear(K, f):
+    # print("solveLinear >>>")
     aQ = deepcopy(K)
     for row, b in zip(aQ, f):
-        row.append(b[0])
+        row.append(deepcopy(b[0]))
     aQtr = makeTriangle(deepcopy(aQ))
-    x = getSolution(aQtr)
+    x = getSolution(deepcopy(aQtr))
     b = np.dot(K, np.array([[cur] for cur in x]))
-    err = list(map(lambda x: x[0][0] - x[1][0], zip(f, b)))
+    # print("f =", list(map(str, f)))
+    # print("b =", list(map(str, b)))
+    err = list(map(lambda x: (x[0][0]- x[1][0])[0], zip(f, b)))
+    # print("solveLinear <<<")
     return (x, err)
 
 if __name__ == "__main__":
