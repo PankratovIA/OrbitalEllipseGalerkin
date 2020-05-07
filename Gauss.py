@@ -30,6 +30,16 @@ def getSolution(a):
 def printQuatMatr(a):
     for row in a:
         print("  ".join(map(str,row)))
+        
+def solveLinear(K, f):
+    aQ = deepcopy(K)
+    for row, b in zip(aQ, f):
+        row.append(b[0])
+    aQtr = makeTriangle(deepcopy(aQ))
+    x = getSolution(aQtr)
+    b = np.dot(K, np.array([[cur] for cur in x]))
+    err = list(map(lambda x: x[0][0] - x[1][0], zip(f, b)))
+    return (x, err)
 
 if __name__ == "__main__":
     print("Gauss >>>")
@@ -70,4 +80,11 @@ if __name__ == "__main__":
     err = list(map(lambda x: x[0] - x[1], zip(f, [deepcopy(aQ[r][-1]) for r in range(len(aQ))])))
     print("err = ")
     printQuatMatr(err)
+    
+    A = [deepcopy(aQ[r][:-1]) for r in range(len(aQ))]
+    b = np.array([[deepcopy(row[-1])] for row in aQ])
+    ansLinear = solveLinear(A, b)
+    print("ansLinear[0] =", list(map(str, ansLinear[0])))
+    print("ansLinear[1] =", list(map(str, ansLinear[1])))
+ 
     print("Gauss <<<") 
