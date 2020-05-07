@@ -1,6 +1,7 @@
 from math import sin, cos, pi
 import numpy as np
 from MathematicModels import Quaternion
+from Gauss import solveLinear
 from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     print(lam([Quaternion([1, 0, 0, 0]), Quaternion([0, 1, 1, 1])], pi/2))
     
     K = [[Quaternion([0, 0, 0, 0]) for _ in range(N)] for _ in range(N)]
-    #print("K =", K)
+    print("K =", K)
     
     for s in range(N):
         for k in range(N):
@@ -112,10 +113,11 @@ if __name__ == "__main__":
     for s in range(N):
         # res = [ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ]
         # print("res = ", res)
-        f[s] = Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )
+        f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
         print("f[", s, "] =", f[s])
         print("f[", s, "][0] =", f[s][0])
-        # 
+    
+    print("f =", f) 
     
     # lam0[0] = 9
     # print(lam0)
@@ -125,9 +127,13 @@ if __name__ == "__main__":
     a = K[0][0].getInv()
     print("Inv check (1, 0, 0, 0) =", a * K[0][0])
     
-    a = f[0] * a 
+    a = f[0][0] * a 
     # a = Quaternion([0, 0, 0, 0])
     print("a =", a)
+    
+    aGauss = solveLinear(K, f)
+    for idx, elem in enumerate(aGauss):
+        print("aGauss[{0}] = {1}".format(idx, list(map(str, elem))))
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam([a], 0))
