@@ -7,7 +7,7 @@ from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
 ez = 0.01
-T = 2*pi / 10
+T = 2*pi / 5
 N = 3
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
@@ -22,6 +22,7 @@ def lamCircle(phi):
     ans = Quaternion([cos(0.5 * om * phi), 0, 0, 0])
     ans = ans + omega
     ans = lam0 * ans
+    # ans = lam0
     return ans
     
 def dlamCircle(phi):
@@ -31,6 +32,7 @@ def dlamCircle(phi):
     ans = Quaternion([-0.5 * om * sin(0.5 * om * phi), 0, 0, 0])
     ans = ans + omega
     ans = lam0 * ans
+    # ans = Quaternion([0, 0, 0, 0])
     return ans
     
 
@@ -40,13 +42,13 @@ def r(phi):
 def Nk(phi, k):
     # return phi ** k
     # return sin((pi * k * phi) / (2 * T))
-    # return sin((k * phi) / (2 * T))
+    return sin((k * phi) / (2 * T))
     return (r(phi) - r(0)) ** k
     
 def dNk(phi, k):
     # return k * (phi ** (k-1))
     # return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
-    # return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
+    return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
     return k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
 
 
@@ -76,7 +78,8 @@ def Kvect(phi, s, k, idx):
     assert(0<=idx<4)
     # print("s = ", s, "idx = ", idx)
     
-    ans = Quaternion([2 * dNk(phi, k), 0, 0, 0])
+    # k+1 or k?
+    ans = Quaternion([2 * dNk(phi, k+1), 0, 0, 0])
     
     r3 = r(phi) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
@@ -107,17 +110,21 @@ if __name__ == "__main__":
     print("K =", K)
     
     for s in range(N):
+        phis = (s+1) * T/(N+1)
         for k in range(N):
             K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
+            # K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
             print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
     
     f = [Quaternion([0, 0, 0, 0]) for _ in range(N)]
     # print("f =", f)
     print("---")
     for s in range(N):
+        phis = (s+1) * T/(N+1)
         # res = [ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ]
         # print("res = ", res)
         f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
+        # f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
         print("f[", s, "] =", f[s])
         print("f[", s, "][0] =", f[s][0])
     
