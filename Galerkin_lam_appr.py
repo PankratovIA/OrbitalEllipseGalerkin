@@ -4,7 +4,7 @@ import numpy as np
 from MathematicModels import Quaternion
 from scipy.integrate import quad
 
-ez = 0.
+ez = 0.1
 T = 0.1
 N = 1
 # lam0 = Quaternion([1, 0, 0, 0])
@@ -48,7 +48,9 @@ def Kvect(phi, s, k, idx):
     assert(0<=idx<4)
     # print("s = ", s, "idx = ", idx)
     
-    ans = Quaternion([2 * dNk(phi, k), 0, 0, 0])
+    # k -> k+1 the same mistake as in circle0
+    # N=1, ||lam(T)||: 0.075 -> 0.997
+    ans = Quaternion([2 * dNk(phi, k+1), 0, 0, 0])
     
     r3 = r(phi) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])

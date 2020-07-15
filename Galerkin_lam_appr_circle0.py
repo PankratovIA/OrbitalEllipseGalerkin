@@ -41,15 +41,15 @@ def r(phi):
 
 def Nk(phi, k):
     # return phi ** k
-    # return sin((pi * k * phi) / (2 * T))
-    return sin((k * phi) / (2 * T))
-    return (r(phi) - r(0)) ** k
+    return sin((pi * k * phi) / (2 * T))
+    # return sin((k * phi) / (2 * T))
+    # return (r(phi) - r(0)) ** k
     
 def dNk(phi, k):
     # return k * (phi ** (k-1))
-    # return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
-    return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
-    return k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
+    return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
+    # return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
+    # return k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
 
 
 def lam(a, phi):
