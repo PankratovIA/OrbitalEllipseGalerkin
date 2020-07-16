@@ -7,8 +7,8 @@ from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
 ez = 0.01
-T = 2*pi / 5
-N = 3
+T = 2*pi / 1 /2/pi
+N = 5
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4]) * Quaternion([1/(30.0)**0.5, 0, 0, 0])
@@ -111,20 +111,29 @@ if __name__ == "__main__":
     
     for s in range(N):
         phis = (s+1) * T/(N+1)
+#         phis = (s+1) * T/N
+        print("phis", phis)
         for k in range(N):
-            K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
-            # K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
+#         Galerkin
+#             K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
+#         pointwise collocation
+            K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
             print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
     
     f = [Quaternion([0, 0, 0, 0]) for _ in range(N)]
     # print("f =", f)
     print("---")
+    print("N =", N, "T =", T)
     for s in range(N):
         phis = (s+1) * T/(N+1)
+#         phis = (s+1) * T/N
+        print("phis", phis)
         # res = [ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ]
         # print("res = ", res)
-        f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
-        # f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
+#         Galerkin
+#         f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
+        # pointwise collocation
+        f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
         print("f[", s, "] =", f[s])
         print("f[", s, "][0] =", f[s][0])
     
