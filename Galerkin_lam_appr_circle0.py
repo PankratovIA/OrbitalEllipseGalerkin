@@ -63,9 +63,7 @@ def lam(a, phi):
         ans = ans + a[k] * Quaternion([Nk(phi, k+1), 0, 0, 0])
     return ans
 
-def fvect(phi, s, idx):
-    assert(0<=idx<4)
-    # print("s = ", s, "idx = ", idx)
+def fvect(phi, s):
     r3 = r(phi) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
     ans = lamCircle(phi) * omega - Quaternion([2.0, 0, 0, 0]) * dlamCircle(phi)
@@ -74,10 +72,8 @@ def fvect(phi, s, idx):
     # short formula from paper
     short = lamCircle(phi) * Quaternion([0, Nb*(r3 - 1.0), 0, 0])
     short = short * Quaternion([Nk(phi, s+1), 0, 0, 0])
-    print("ans -- short", ans[idx], short[idx], abs(ans[idx] - short[idx]))
-    # print(ans[idx])
-    # return ans[idx]
-    return short[idx]
+    # print("ans -- short", ans[idx], short[idx], abs(ans[idx] - short[idx]))
+    return short
     
 def Kvect(phi, s, k):
     # k+1 or k?
@@ -135,10 +131,9 @@ if __name__ == "__main__":
 #         Galerkin
 #         f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
         # pointwise collocation
-        f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
         # f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
+        f[s] = [fvect(phis, s)]
         print("f[", s, "] =", f[s])
-        print("f[", s, "][0] =", f[s][0])
     
     print("f =", f) 
     
