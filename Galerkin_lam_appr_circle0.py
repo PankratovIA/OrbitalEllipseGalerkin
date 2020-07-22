@@ -71,13 +71,15 @@ def fvect(phi, s, idx):
     ans = lamCircle(phi) * omega - Quaternion([2.0, 0, 0, 0]) * dlamCircle(phi)
     
     ans = ans * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    # short formula from paper
+    short = lamCircle(phi) * Quaternion([0, Nb*(r3 - 1.0), 0, 0])
+    short = short * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    print("ans -- short", ans[idx], short[idx], abs(ans[idx] - short[idx]))
     # print(ans[idx])
-    return ans[idx]
+    # return ans[idx]
+    return short[idx]
     
-def Kvect(phi, s, k, idx):
-    assert(0<=idx<4)
-    # print("s = ", s, "idx = ", idx)
-    
+def Kvect(phi, s, k):
     # k+1 or k?
     ans = Quaternion([2 * dNk(phi, k+1), 0, 0, 0])
     
@@ -86,8 +88,7 @@ def Kvect(phi, s, k, idx):
     
     ans = ans - omega * Quaternion([Nk(phi, k+1), 0, 0, 0])
     ans = ans * Quaternion([Nk(phi, s+1), 0, 0, 0])
-    # print(ans[idx])
-    return ans[idx]
+    return ans
     
 # Cauchy
 def eqEllipse(lam, phi):
@@ -117,7 +118,8 @@ if __name__ == "__main__":
 #         Galerkin
 #             K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
 #         pointwise collocation
-            K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
+            # K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
+            K[s][k] = Kvect(phis, s, k)
             print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
     
     f = [Quaternion([0, 0, 0, 0]) for _ in range(N)]
@@ -134,6 +136,7 @@ if __name__ == "__main__":
 #         f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
         # pointwise collocation
         f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
+        # f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
         print("f[", s, "] =", f[s])
         print("f[", s, "][0] =", f[s][0])
     
