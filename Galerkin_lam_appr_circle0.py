@@ -106,29 +106,29 @@ def genSol(e):
     for s in range(M):
         phis = (s+1) * T/(M+1)
 #         phis = (s+1) * T/M
-        print("phis", phis)
+        # print("phis", phis)
         for k in range(M):
             # pointwise collocation
             K[s][k] = Kvect(phis, e, s, k)
-            print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
+            # print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
             
         f[s] = [fvect(phis, e, s)]
-        print("f[", s, "] =", f[s])
-    print("f =", f)
+        # print("f[", s, "] =", f[s])
+    # print("f =", f)
     
     aGauss = solveLinear(K, f)
-    for idx, elem in enumerate(aGauss):
-        print("aGauss[{0}] = {1}".format(idx, list(map(str, elem))))
+    # for idx, elem in enumerate(aGauss):
+    #     print("aGauss[{0}] = {1}".format(idx, list(map(str, elem))))
     a = deepcopy(aGauss[0])
-    print("a =", list(map(str,a)))
+    # print("a =", list(map(str,a)))
     return a
  
     
 if __name__ == "__main__":
-    print("Galerkin >>>")    
-    print(r(3.14, EZ))
-    
-    print(lam([Quaternion([1, 0, 0, 0]), Quaternion([0, 1, 1, 1])], pi/2))
+    print("MVN >>>")    
+    # print(r(3.14, EZ))
+    # 
+    # print(lam([Quaternion([1, 0, 0, 0]), Quaternion([0, 1, 1, 1])], pi/2))
     
         
     
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     print("Cauchy >>>")
     phi = np.linspace(0, T, 1001)
     sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (EZ,), rtol=1e-15)
-    print(sol[:5], "\n\n", sol[-5:])
+    # print(sol[:5], "\n\n", sol[-5:])
     
     lastQ = Quaternion(sol[-1])
     print(lastQ, lastQ.getNorm())
@@ -167,8 +167,8 @@ if __name__ == "__main__":
         diff = Quaternion(cur[1]) - l
         err.append(diff.getNorm() ** .5)
         
-    print(err[:5])
-    print(err[-5:])
+    # print(err[:5])
+    # print(err[-5:])
     
     plt.plot(phi, err, label ='err')
     plt.legend(loc='best')
@@ -178,6 +178,6 @@ if __name__ == "__main__":
     
     print("Cauchy <<<")
     
-    print("Galerkin <<<")    
+    print("MVN <<<")    
 
 
