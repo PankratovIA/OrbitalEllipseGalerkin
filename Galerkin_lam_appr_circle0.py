@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 EZ = 0.01
 T = 1
-N = 5
+M = 5
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4]) * Quaternion([1/(30.0)**0.5, 0, 0, 0])
@@ -96,9 +96,33 @@ def eqEllipse(lam, phi, ez):
     ans = ans * Quaternion([0.5, 0, 0, 0])
     return [ans[idx] for idx in range(4)]
     
-# def genSol(e):
+def genSol(e):
+    K = [[Quaternion([0, 0, 0, 0]) for _ in range(M)] for _ in range(M)]
+    # print("K =", K)
     
-        
+    f = [Quaternion([0, 0, 0, 0]) for _ in range(M)]
+    # print("f =", f)
+    
+    for s in range(M):
+        phis = (s+1) * T/(M+1)
+#         phis = (s+1) * T/M
+        print("phis", phis)
+        for k in range(M):
+            # pointwise collocation
+            K[s][k] = Kvect(phis, e, s, k)
+            print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
+            
+        f[s] = [fvect(phis, e, s)]
+        print("f[", s, "] =", f[s])
+    print("f =", f)
+    
+    aGauss = solveLinear(K, f)
+    for idx, elem in enumerate(aGauss):
+        print("aGauss[{0}] = {1}".format(idx, list(map(str, elem))))
+    a = deepcopy(aGauss[0])
+    print("a =", list(map(str,a)))
+    return a
+ 
     
 if __name__ == "__main__":
     print("Galerkin >>>")    
@@ -106,45 +130,13 @@ if __name__ == "__main__":
     
     print(lam([Quaternion([1, 0, 0, 0]), Quaternion([0, 1, 1, 1])], pi/2))
     
-    K = [[Quaternion([0, 0, 0, 0]) for _ in range(N)] for _ in range(N)]
-    print("K =", K)
-    
-    for s in range(N):
-        phis = (s+1) * T/(N+1)
-#         phis = (s+1) * T/N
-        print("phis", phis)
-        for k in range(N):
-#         Galerkin
-#             K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
-#         pointwise collocation
-            # K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
-            K[s][k] = Kvect(phis, EZ, s, k)
-            print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
-    
-    f = [Quaternion([0, 0, 0, 0]) for _ in range(N)]
-    # print("f =", f)
-    print("---")
-    print("N =", N, "T =", T)
-    for s in range(N):
-        phis = (s+1) * T/(N+1)
-#         phis = (s+1) * T/N
-        print("phis", phis)
-        # res = [ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ]
-        # print("res = ", res)
-#         Galerkin
-#         f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
-        # pointwise collocation
-        # f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
-        f[s] = [fvect(phis, EZ, s)]
-        print("f[", s, "] =", f[s])
-    
-    print("f =", f) 
+        
     
     # lam0[0] = 9
     # print(lam0)
     
-    #assert(N == 1)
-    print("N =", N)
+    #assert(M == 1)
+    print("M =", M)
     
     # a = K[0][0].getInv()
     # print("Inv check (1, 0, 0, 0) =", a * K[0][0])
@@ -152,11 +144,7 @@ if __name__ == "__main__":
     # a = f[0][0] * a 
     # print("a =", a)
     
-    aGauss = solveLinear(K, f)
-    for idx, elem in enumerate(aGauss):
-        print("aGauss[{0}] = {1}".format(idx, list(map(str, elem))))
-    a = deepcopy(aGauss[0])
-    print("a =", list(map(str,a)))
+    a = genSol(EZ)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0))
