@@ -13,6 +13,8 @@ M = 5
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4]) * Quaternion([1/(30.0)**0.5, 0, 0, 0])
 Nb = 0.35
+
+BASE = 1
     
 def lamCircle(phi):
     omega = Quaternion([0, Nb, 0, 1.0])
@@ -40,15 +42,15 @@ def r(phi, ez):
     return 1.0 / (1.0 + ez * cos(phi))
 
 def Nk(phi, k):
-    # return phi ** k
-    return sin((pi * k * phi) / (2 * T))
-    # return sin((k * phi) / (2 * T))
-    # return (r(phi) - r(0)) ** k
+    ans = [phi ** k,
+           sin((pi * k * phi) / (2 * T)),
+           sin((k * phi) / (2 * T))]#, (r(phi) - r(0)) ** k]
+    return ans[BASE]
     
 def dNk(phi, k):
-    # return k * (phi ** (k-1))
-    return ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T))
-    # return ((k) / (2 * T)) * cos((k * phi) / (2 * T))
+    ans = [k * (phi ** (k-1)), ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T)),
+           ((k) / (2 * T)) * cos((k * phi) / (2 * T))]
+    return ans[BASE]
     # return k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
 
 
@@ -123,8 +125,8 @@ def genSol(e):
     # print("a =", list(map(str,a)))
     return a
 
-def genError(start, finish, de):
-    for e in np.arange(start, finish+de/2, de):
+def genError(finish, de):
+    for e in np.arange(de, finish+de/2, de):
         print(e)
         a = genSol(e)
         # print(a)
@@ -159,7 +161,7 @@ if __name__ == "__main__":
     
     a = genSol(EZ)
     
-    genError(1e-3, 1e-2, 1e-3)
+    genError(1e-1, 1e-2)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0))
