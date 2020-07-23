@@ -6,8 +6,8 @@ from copy import deepcopy
 from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
-ez = 0.01
-T = 2*pi / 1 /2/pi
+EZ = 0.01
+T = 1
 N = 5
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
@@ -36,7 +36,7 @@ def dlamCircle(phi):
     return ans
     
 
-def r(phi):
+def r(phi, ez):
     return 1.0 / (1.0 + ez * cos(phi))
 
 def Nk(phi, k):
@@ -63,8 +63,8 @@ def lam(a, phi):
         ans = ans + a[k] * Quaternion([Nk(phi, k+1), 0, 0, 0])
     return ans
 
-def fvect(phi, s):
-    r3 = r(phi) ** 3.0
+def fvect(phi, ez, s):
+    r3 = r(phi, ez) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
     ans = lamCircle(phi) * omega - Quaternion([2.0, 0, 0, 0]) * dlamCircle(phi)
     
@@ -75,11 +75,11 @@ def fvect(phi, s):
     # print("ans -- short", ans[idx], short[idx], abs(ans[idx] - short[idx]))
     return short
     
-def Kvect(phi, s, k):
+def Kvect(phi, ez, s, k):
     # k+1 or k?
     ans = Quaternion([2 * dNk(phi, k+1), 0, 0, 0])
     
-    r3 = r(phi) ** 3.0
+    r3 = r(phi, ez) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
     
     ans = ans - omega * Quaternion([Nk(phi, k+1), 0, 0, 0])
@@ -87,19 +87,22 @@ def Kvect(phi, s, k):
     return ans
     
 # Cauchy
-def eqEllipse(lam, phi):
+def eqEllipse(lam, phi, ez):
     #print("lam =", lam)
     lam = Quaternion(lam)
-    r3 = r(phi) ** 3.0
+    r3 = r(phi, ez) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
     ans = lam * omega
     ans = ans * Quaternion([0.5, 0, 0, 0])
     return [ans[idx] for idx in range(4)]
+    
+# def genSol(e):
+    
         
     
 if __name__ == "__main__":
     print("Galerkin >>>")    
-    print(r(3.14))
+    print(r(3.14, EZ))
     
     print(lam([Quaternion([1, 0, 0, 0]), Quaternion([0, 1, 1, 1])], pi/2))
     
@@ -115,7 +118,7 @@ if __name__ == "__main__":
 #             K[s][k] = Quaternion([ quad(Kvect, 0, T,args=(s, k, idx))[0] for idx in range(4) ] )
 #         pointwise collocation
             # K[s][k] = Quaternion( [Kvect(phis, s, k, idx) for idx in range(4) ] )
-            K[s][k] = Kvect(phis, s, k)
+            K[s][k] = Kvect(phis, EZ, s, k)
             print("K[{0}, {1}] = {2}".format(s, k, K[s][k]))
     
     f = [Quaternion([0, 0, 0, 0]) for _ in range(N)]
@@ -132,7 +135,7 @@ if __name__ == "__main__":
 #         f[s] = [Quaternion([ quad(fvect, 0, T,args=(s, idx))[0] for idx in range(4) ] )]
         # pointwise collocation
         # f[s] = [Quaternion([ fvect(phis, s, idx) for idx in range(4) ] )]
-        f[s] = [fvect(phis, s)]
+        f[s] = [fvect(phis, EZ, s)]
         print("f[", s, "] =", f[s])
     
     print("f =", f) 
@@ -165,7 +168,7 @@ if __name__ == "__main__":
     # sin [0.029878477588461995, 0.02994193916572772, 0.030005212904268913, 0.030068280403747726, 0.030131123479297209]
     print("Cauchy >>>")
     phi = np.linspace(0, T, 1001)
-    sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, rtol=1e-15)
+    sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (EZ,), rtol=1e-15)
     print(sol[:5], "\n\n", sol[-5:])
     
     lastQ = Quaternion(sol[-1])
