@@ -122,7 +122,20 @@ def genSol(e):
     a = deepcopy(aGauss[0])
     # print("a =", list(map(str,a)))
     return a
- 
+
+def genError(start, finish, de):
+    for e in np.arange(start, finish+de/2, de):
+        print(e)
+        a = genSol(e)
+        # print(a)
+        phi = np.linspace(0, T, 1001)
+        sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (e,), rtol=1e-15)
+        err = []
+        for cur in zip(phi, sol):
+            l = lam(a, cur[0])
+            diff = Quaternion(cur[1]) - l
+            err.append(diff.getNorm() ** .5)
+        print(max(err))
     
 if __name__ == "__main__":
     print("MVN >>>")    
@@ -145,6 +158,8 @@ if __name__ == "__main__":
     # print("a =", a)
     
     a = genSol(EZ)
+    
+    genError(1e-3, 1e-2, 1e-3)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0))
@@ -170,11 +185,11 @@ if __name__ == "__main__":
     # print(err[:5])
     # print(err[-5:])
     
-    plt.plot(phi, err, label ='err')
-    plt.legend(loc='best')
-    plt.xlabel('phi')
-    plt.grid()
-    plt.show()
+    # plt.plot(phi, err, label ='err')
+    # plt.legend(loc='best')
+    # plt.xlabel('phi')
+    # plt.grid()
+    # plt.show()
     
     print("Cauchy <<<")
     
