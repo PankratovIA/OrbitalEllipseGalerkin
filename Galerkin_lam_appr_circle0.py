@@ -50,8 +50,8 @@ def Nk(phi, k):
 def dNk(phi, k):
     ans = [k * (phi ** (k-1)), ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T)),
            ((k) / (2 * T)) * cos((k * phi) / (2 * T))]
+           # k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
     return ans[BASE]
-    # return k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
 
 
 def lam(a, phi):
@@ -135,6 +135,7 @@ def genError(finish, de):
         err = []
         for cur in zip(phi, sol):
             l = lam(a, cur[0])
+            # l = l * Quaternion([1/l.getNorm()**0.5, 0, 0, 0])
             diff = Quaternion(cur[1]) - l
             err.append(diff.getNorm() ** .5)
         print(max(err))
