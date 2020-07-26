@@ -7,7 +7,7 @@ from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
 EZ = 0.01
-T = 1
+T = pi/2
 M = 5
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
@@ -129,8 +129,10 @@ def genSol(e, M):
 
 def genError(finish, de):
     res = []
-    out = open("res/BASE{0}.dat".format(BASE), "w")
+    out = open("res/BASE{0}.dat".format(BASE, T), "w")
     mx = None
+    print("T =", T)
+    out.write("T = {0}".format(T))
     for e in np.arange(de, finish+de/2, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
