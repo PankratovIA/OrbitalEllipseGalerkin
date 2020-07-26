@@ -126,6 +126,7 @@ def genSol(e):
     return a
 
 def genError(finish, de):
+    out = open("res/BASE{0}_M{1}.dat".format(BASE, M), "w")
     for e in np.arange(de, finish+de/2, de):
         print(e)
         a = genSol(e)
@@ -139,6 +140,8 @@ def genError(finish, de):
             diff = Quaternion(cur[1]) - l
             err.append(diff.getNorm() ** .5)
         print(max(err))
+        out.write("{0:.2f} {1:.20f}\n".format(e, max(err)))
+    out.close()
     
 if __name__ == "__main__":
     print("MVN >>>")    
