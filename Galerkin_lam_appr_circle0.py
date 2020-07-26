@@ -100,7 +100,7 @@ def eqEllipse(lam, phi, ez):
     ans = ans * Quaternion([0.5, 0, 0, 0])
     return [ans[idx] for idx in range(4)]
     
-def genSol(e):
+def genSol(e, M):
     K = [[Quaternion([0, 0, 0, 0]) for _ in range(M)] for _ in range(M)]
     # print("K =", K)
     
@@ -128,22 +128,31 @@ def genSol(e):
     return a
 
 def genError(finish, de):
-    out = open("res/BASE{0}_M{1}.dat".format(BASE, M), "w")
+    res = []
+    out = open("res/BASE{0}.dat".format(BASE), "w")
+    mx = None
     for e in np.arange(de, finish+de/2, de):
         print(e)
-        a = genSol(e)
-        # print(a)
-        phi = np.linspace(0, T, 1001)
-        sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (e,), rtol=1e-15)
-        err = []
-        for cur in zip(phi, sol):
-            l = lam(a, cur[0])
-            # l = l * Quaternion([1/l.getNorm()**0.5, 0, 0, 0])
-            diff = Quaternion(cur[1]) - l
-            err.append(diff.getNorm() ** .5)
-        print(max(err))
-        out.write("{0:.2f} {1:.20f}\n".format(e, max(err)))
+        out.write("\n{0:.2f}".format(e))
+        for M in range(2, 11):
+            print("M =", M)
+            a = genSol(e, M)
+            # print(a)
+            phi = np.linspace(0, T, 1001)
+            sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (e,), rtol=1e-15)
+            err = []
+            for cur in zip(phi, sol):
+                l = lam(a, cur[0])
+                # l = l * Quaternion([1/l.getNorm()**0.5, 0, 0, 0])
+                diff = Quaternion(cur[1]) - l
+                err.append(diff.getNorm() ** .5)
+            mx = max(err)
+            print(mx)
+            out.write(" {0:.20f}".format(mx))
+        res.append(mx)
+        print()
     out.close()
+    print(res)
     
 if __name__ == "__main__":
     print("MVN >>>")    
@@ -165,7 +174,7 @@ if __name__ == "__main__":
     # a = f[0][0] * a 
     # print("a =", a)
     
-    a = genSol(EZ)
+    a = genSol(EZ, M)
     
     genError(1e-1, 1e-2)
     
