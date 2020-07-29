@@ -16,7 +16,7 @@ lam0 = Quaternion([-0.235019, -0.144020, 0.502258, 0.819610]) #  GLONASS
 lam0 = lam0 * Quaternion([1.0/lam0.getNorm()**0.5, 0, 0, 0])
 Nb = 0.35
 
-BASE = 3
+BASE = 2
     
 def lamCircle(phi):
     omega = Quaternion([0, Nb, 0, 1.0])
@@ -137,11 +137,19 @@ def genError(finish, de):
     mx = None
     print("T =", T)
     out.write("T = {0}".format(T))
+    Mmin, mMax = (8, 13)
+    for m in range (Mmin, mMax):
+        out.write(" {0}".format(m))
+    out.write("\n")
+    for m in range (Mmin, mMax):
+        outL.write(" {0}".format(m))
+    outL.write("\n")
+
     for e in np.arange(de, finish+de/2, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
         outL.write("\n${0:.2f}$".format(e))
-        for M in range(2, 9):
+        for M in range(8, 13):
             print("M =", M)
             a = genSol(e, M)
             # print(a)
