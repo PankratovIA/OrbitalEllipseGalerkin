@@ -16,7 +16,7 @@ lam0 = Quaternion([-0.235019, -0.144020, 0.502258, 0.819610]) #  GLONASS
 lam0 = lam0 * Quaternion([1.0/lam0.getNorm()**0.5, 0, 0, 0])
 Nb = 0.35
 
-BASE = 2
+BASE = 3
     
 def lamCircle(phi):
     omega = Quaternion([0, Nb, 0, 1.0])
