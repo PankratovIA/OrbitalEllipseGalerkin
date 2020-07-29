@@ -16,7 +16,7 @@ lam0 = Quaternion([-0.235019, -0.144020, 0.502258, 0.819610]) #  GLONASS
 lam0 = lam0 * Quaternion([1.0/lam0.getNorm()**0.5, 0, 0, 0])
 Nb = 0.35
 
-BASE = 1
+BASE = 2
     
 def lamCircle(phi):
     omega = Quaternion([0, Nb, 0, 1.0])
@@ -45,12 +45,15 @@ def r(phi, ez):
 
 def Nk(phi, k):
     ans = [phi ** k,
+           (phi / T) ** k,
            sin((pi * k * phi) / (2 * T)),
            sin((k * phi) / (2 * T))]#, (r(phi) - r(0)) ** k]
     return ans[BASE]
     
 def dNk(phi, k):
-    ans = [k * (phi ** (k-1)), ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T)),
+    ans = [k * (phi ** (k-1)),
+           k * (phi ** (k-1)) / (T ** k),
+           ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T)),
            ((k) / (2 * T)) * cos((k * phi) / (2 * T))]
            # k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
     return ans[BASE]
