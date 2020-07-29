@@ -130,13 +130,15 @@ def genSol(e, M):
 def genError(finish, de):
     res = []
     out = open("res/BASE{0}.dat".format(BASE, T), "w")
+    outL = open("res/BASE_Latex{0}.dat".format(BASE, T), "w")
     mx = None
     print("T =", T)
     out.write("T = {0}".format(T))
     for e in np.arange(de, finish+de/2, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
-        for M in range(2, 11):
+        outL.write("\n${0:.2f}$".format(e))
+        for M in range(2, 9):
             print("M =", M)
             a = genSol(e, M)
             # print(a)
@@ -152,9 +154,14 @@ def genError(finish, de):
             print(mx)
             # out.write(" {0:.20f}".format(mx))
             out.write(" {0:.1e}".format(mx))
+            latex = " & ${0:.1e}".format(mx) + "}$"
+            latex = latex.replace("e-0", " \cdot 10^{-")
+            outL.write(latex)
+        outL.write("\\\\[0.25em]\n\\hline\n%")
         res.append(mx)
         print()
     out.close()
+    outL.close()
     print(res)
     
 if __name__ == "__main__":
