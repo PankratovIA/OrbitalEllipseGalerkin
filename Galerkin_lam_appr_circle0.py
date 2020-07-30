@@ -16,7 +16,7 @@ lam0 = Quaternion([-0.235019, -0.144020, 0.502258, 0.819610]) #  GLONASS
 lam0 = lam0 * Quaternion([1.0/lam0.getNorm()**0.5, 0, 0, 0])
 Nb = 0.35
 
-BASE = 1
+BASE = 2
     
 def lamCircle(phi):
     omega = Quaternion([0, Nb, 0, 1.0])
@@ -135,8 +135,8 @@ def genSol(e, M):
 
 def genError(finish, de):
     res = []
-    out = open("res/BASE{0}.dat".format(BASE, T), "w")
-    outL = open("res/BASE_Latex{0}.dat".format(BASE, T), "w")
+    out = open("res/BASE{0}.dat".format(BASE), "w")
+    outL = open("res/BASE_Latex{0}.dat".format(BASE), "w")
     mx = None
     print("T =", T)
     out.write("T = {0}".format(T))
@@ -178,6 +178,33 @@ def genError(finish, de):
     outL.close()
     print(res)
     
+def genGraph(finish, de, m):
+    out = open("res/BASE_Graph{0}_M{1}.dat".format(BASE, m), "w")
+    for e in np.arange(de, finish+de/2, de):
+        print(e)
+        out.write("\n{0:.2f}".format(e))
+        print("M =", m)
+        a = genSol(e, m)
+        # print(a)
+        phi = np.linspace(0, T, 1001)
+        sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (e,), rtol=1e-15)
+        err = []
+        mx = [-1, -1, -1, -1]
+        for cur in zip(phi, sol):
+            l = lam(a, cur[0], e)
+            # l = l * Quaternion([1/l.getNorm()**0.5, 0, 0, 0])
+            diff = Quaternion(cur[1]) - l
+            # print(diff)
+            for idx in range(4):
+                mx[idx] = max(mx[idx], abs(diff[idx]))
+        for idx in range(4):
+            out.write(" {0}".format(mx[idx]))
+        out.write(" {0:.1e}".format(Quaternion(mx).getNorm() ** .5))
+        print(Quaternion(mx).getNorm() ** .5)
+    print()
+    out.close()
+    
+    
 if __name__ == "__main__":
     print("MVN >>>")    
     # print(r(3.14, EZ))
@@ -200,7 +227,9 @@ if __name__ == "__main__":
     
     a = genSol(EZ, M)
     
-    genError(1e-1, 1e-2)
+    # genError(1e-1, 1e-2)
+    
+    genGraph(1e-1, 1e-2, 5)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0, EZ))
