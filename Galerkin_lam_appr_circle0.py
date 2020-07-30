@@ -189,16 +189,18 @@ def genGraph(finish, de, m):
         phi = np.linspace(0, T, 1001)
         sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (e,), rtol=1e-15)
         err = []
-        mx = [-1, -1, -1, -1]
+        mx, norm = Quaternion([-1, -1, -1, -1]), -1
         for cur in zip(phi, sol):
             l = lam(a, cur[0], e)
             # l = l * Quaternion([1/l.getNorm()**0.5, 0, 0, 0])
             diff = Quaternion(cur[1]) - l
             # print(diff)
-            for idx in range(4):
-                mx[idx] = max(mx[idx], abs(diff[idx]))
+            ndiff = diff.getNorm() ** .5
+            if ndiff > norm:
+                mx = diff
+                norm = ndiff
         for idx in range(4):
-            out.write(" {0}".format(mx[idx]))
+            out.write(" {0}".format(abs(mx[idx])))
         out.write(" {0:.1e}".format(Quaternion(mx).getNorm() ** .5))
         print(Quaternion(mx).getNorm() ** .5)
     print()
