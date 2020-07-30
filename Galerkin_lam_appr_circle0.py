@@ -16,7 +16,7 @@ lam0 = Quaternion([-0.235019, -0.144020, 0.502258, 0.819610]) #  GLONASS
 lam0 = lam0 * Quaternion([1.0/lam0.getNorm()**0.5, 0, 0, 0])
 Nb = 0.35
 
-BASE = 2
+BASE = 1
     
 def lamCircle(phi):
     omega = Quaternion([0, Nb, 0, 1.0])
@@ -43,23 +43,26 @@ def dlamCircle(phi):
 def r(phi, ez):
     return 1.0 / (1.0 + ez * cos(phi))
 
-def Nk(phi, k):
+def Nk(phi, k, ez):
     ans = [phi ** k,
            (phi / T) ** k,
            sin((pi * k * phi) / (2 * T)),
-           sin((k * phi) / (2 * T))]#, (r(phi) - r(0)) ** k]
+           sin((k * phi) / (2 * T)),
+           (r(phi, ez) - r(0, ez)) ** k,
+           ((r(phi, ez) - r(0, ez))/T) ** k,]
     return ans[BASE]
     
-def dNk(phi, k):
+def dNk(phi, k, ez):
     ans = [k * (phi ** (k-1)),
            k * (phi ** (k-1)) / (T ** k),
            ((pi * k) / (2 * T)) * cos((pi * k * phi) / (2 * T)),
-           ((k) / (2 * T)) * cos((k * phi) / (2 * T))]
-           # k * (ez * sin(phi) * (r(phi) ** 2.0)) * ((r(phi) - r(0)) ** (k-1))
+           ((k) / (2 * T)) * cos((k * phi) / (2 * T)),
+            k * (ez * sin(phi) * (r(phi, ez) ** 2.0)) * ((r(phi, ez) - r(0, ez)) ** (k-1)),
+            k * (ez * sin(phi) * (r(phi, ez) ** 2.0)/(T**k)) * ((r(phi, ez) - r(0, ez)) ** (k-1))]
     return ans[BASE]
 
 
-def lam(a, phi):
+def lam(a, phi, ez):
     ans = lamCircle(phi)
     for k in range(len(a)):
         # print("ak", a[k])
@@ -67,7 +70,7 @@ def lam(a, phi):
         # print("Nkq", Nkq)
         # mul = a[k] * Nkq
         # print("mul", mul)
-        ans = ans + a[k] * Quaternion([Nk(phi, k+1), 0, 0, 0])
+        ans = ans + a[k] * Quaternion([Nk(phi, k+1, ez), 0, 0, 0])
     return ans
 
 def fvect(phi, ez, s):
@@ -75,22 +78,22 @@ def fvect(phi, ez, s):
     omega = Quaternion([0, Nb * r3, 0, 1.0])
     ans = lamCircle(phi) * omega - Quaternion([2.0, 0, 0, 0]) * dlamCircle(phi)
     
-    ans = ans * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    ans = ans * Quaternion([Nk(phi, s+1, ez), 0, 0, 0])
     # short formula from paper
     short = lamCircle(phi) * Quaternion([0, Nb*(r3 - 1.0), 0, 0])
-    short = short * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    short = short * Quaternion([Nk(phi, s+1, ez), 0, 0, 0])
     # print("ans -- short", ans[idx], short[idx], abs(ans[idx] - short[idx]))
     return short
     
 def Kvect(phi, ez, s, k):
     # k+1 or k?
-    ans = Quaternion([2 * dNk(phi, k+1), 0, 0, 0])
+    ans = Quaternion([2 * dNk(phi, k+1, ez), 0, 0, 0])
     
     r3 = r(phi, ez) ** 3.0
     omega = Quaternion([0, Nb * r3, 0, 1.0])
     
-    ans = ans - omega * Quaternion([Nk(phi, k+1), 0, 0, 0])
-    ans = ans * Quaternion([Nk(phi, s+1), 0, 0, 0])
+    ans = ans - omega * Quaternion([Nk(phi, k+1, ez), 0, 0, 0])
+    ans = ans * Quaternion([Nk(phi, s+1, ez), 0, 0, 0])
     return ans
     
 # Cauchy
@@ -137,11 +140,11 @@ def genError(finish, de):
     mx = None
     print("T =", T)
     out.write("T = {0}".format(T))
-    Mmin, mMax = (8, 13)
-    for m in range (Mmin, mMax):
+    Mmin, Mmax = (2, 9)
+    for m in range (Mmin, Mmax):
         out.write(" {0}".format(m))
     out.write("\n")
-    for m in range (Mmin, mMax):
+    for m in range (Mmin, Mmax):
         outL.write(" {0}".format(m))
     outL.write("\n")
 
@@ -149,7 +152,7 @@ def genError(finish, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
         outL.write("\n${0:.2f}$".format(e))
-        for M in range(8, 13):
+        for M in range(Mmin, Mmax):
             print("M =", M)
             a = genSol(e, M)
             # print(a)
@@ -157,7 +160,7 @@ def genError(finish, de):
             sol = odeint(eqEllipse, [lam0[idx] for idx in range(4)], phi, args = (e,), rtol=1e-15)
             err = []
             for cur in zip(phi, sol):
-                l = lam(a, cur[0])
+                l = lam(a, cur[0], e)
                 # l = l * Quaternion([1/l.getNorm()**0.5, 0, 0, 0])
                 diff = Quaternion(cur[1]) - l
                 err.append(diff.getNorm() ** .5)
@@ -200,8 +203,8 @@ if __name__ == "__main__":
     genError(1e-1, 1e-2)
     
     print("lam0 = ", lam0, lam0.getNorm())
-    print("lam(0) = ", lam(a, 0))
-    print("lam(T) = ", lam(a, T), lam(a, T).getNorm())
+    print("lam(0) = ", lam(a, 0, EZ))
+    print("lam(T) = ", lam(a, T, EZ), lam(a, T, EZ).getNorm())
     
     #Cauchy
     print("Cauchy >>>")
@@ -212,11 +215,11 @@ if __name__ == "__main__":
     lastQ = Quaternion(sol[-1])
     print(lastQ, lastQ.getNorm())
     
-    print(lam(a, T), lam(a, T).getNorm())
+    print(lam(a, T, EZ), lam(a, T, EZ).getNorm())
     
     err = []
     for cur in zip(phi, sol):
-        l = lam(a, cur[0])
+        l = lam(a, cur[0], EZ)
         diff = Quaternion(cur[1]) - l
         err.append(diff.getNorm() ** .5)
         
