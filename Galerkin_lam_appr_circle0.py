@@ -180,6 +180,8 @@ def genError(finish, de):
     
 def genGraph(finish, de, m):
     out = open("res/BASE_Graph{0}_M{1}.dat".format(BASE, m), "w")
+    for _ in range(5):
+        out.write(" {0}".format(0))
     for e in np.arange(de, finish+de/2, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
