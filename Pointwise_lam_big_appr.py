@@ -1,3 +1,6 @@
+"""
+    Lambda big eq. No circle.
+"""
 from math import sin, cos, pi
 import numpy as np
 from MathematicModels import Quaternion
@@ -6,9 +9,9 @@ from copy import deepcopy
 from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
-EZ = 0.01
-T = pi/2
-M = 5
+EZ = 0.1
+T = pi/3
+M = 6
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4])
@@ -16,27 +19,14 @@ lam0 = Quaternion([-0.235019, -0.144020, 0.502258, 0.819610]) #  GLONASS
 lam0 = lam0 * Quaternion([1.0/lam0.getNorm()**0.5, 0, 0, 0])
 Nb = 0.35
 
-BASE = 2
+BASE = 0
     
 def lamCircle(phi):
-    omega = Quaternion([0, Nb, 0, 1.0])
-    om = (1 + Nb * Nb) ** 0.5
-    
-    omega = omega * Quaternion([sin(0.5 * om * phi)/om, 0, 0, 0])
-    ans = Quaternion([cos(0.5 * om * phi), 0, 0, 0])
-    ans = ans + omega
-    ans = lam0 * ans
-    # ans = lam0
+    ans = lam0
     return ans
     
 def dlamCircle(phi):
-    omega = Quaternion([0, Nb, 0, 1.0])
-    om = (1 + Nb * Nb) ** 0.5
-    omega = omega * Quaternion([0.5*cos(0.5 * om * phi), 0, 0, 0])
-    ans = Quaternion([-0.5 * om * sin(0.5 * om * phi), 0, 0, 0])
-    ans = ans + omega
-    ans = lam0 * ans
-    # ans = Quaternion([0, 0, 0, 0])
+    ans = Quaternion([0, 0, 0, 0])
     return ans
     
 
@@ -75,22 +65,18 @@ def lam(a, phi, ez):
 
 def fvect(phi, ez, s):
     r3 = r(phi, ez) ** 3.0
-    omega = Quaternion([0, Nb * r3, 0, 1.0])
+    omega = Quaternion([0, Nb * r3 * cos(phi), Nb * r3 * sin(phi), 0])
     ans = lamCircle(phi) * omega - Quaternion([2.0, 0, 0, 0]) * dlamCircle(phi)
     
     ans = ans * Quaternion([Nk(phi, s+1, ez), 0, 0, 0])
-    # short formula from paper
-    short = lamCircle(phi) * Quaternion([0, Nb*(r3 - 1.0), 0, 0])
-    short = short * Quaternion([Nk(phi, s+1, ez), 0, 0, 0])
-    # print("ans -- short", ans[idx], short[idx], abs(ans[idx] - short[idx]))
-    return short
+    return ans
     
 def Kvect(phi, ez, s, k):
     # k+1 or k?
     ans = Quaternion([2 * dNk(phi, k+1, ez), 0, 0, 0])
     
     r3 = r(phi, ez) ** 3.0
-    omega = Quaternion([0, Nb * r3, 0, 1.0])
+    omega = Quaternion([0, Nb * r3 * cos(phi), Nb * r3 * sin(phi), 0])
     
     ans = ans - omega * Quaternion([Nk(phi, k+1, ez), 0, 0, 0])
     ans = ans * Quaternion([Nk(phi, s+1, ez), 0, 0, 0])
@@ -101,7 +87,7 @@ def eqEllipse(lam, phi, ez):
     #print("lam =", lam)
     lam = Quaternion(lam)
     r3 = r(phi, ez) ** 3.0
-    omega = Quaternion([0, Nb * r3, 0, 1.0])
+    omega = Quaternion([0, Nb * r3 * cos(phi), Nb * r3 * sin(phi), 0])
     ans = lam * omega
     ans = ans * Quaternion([0.5, 0, 0, 0])
     return [ans[idx] for idx in range(4)]
@@ -135,8 +121,8 @@ def genSol(e, M):
 
 def genError(finish, de):
     res = []
-    out = open("res/BASE{0}.dat".format(BASE), "w")
-    outL = open("res/BASE_Latex{0}.dat".format(BASE), "w")
+    out = open("res/BASE{0}_big.dat".format(BASE), "w")
+    outL = open("res/BASE_Latex{0}_big.dat".format(BASE), "w")
     mx = None
     print("T =", T)
     out.write("T = {0}".format(T))
@@ -179,10 +165,10 @@ def genError(finish, de):
     print(res)
     
 def genGraph(finish, de, m):
-    out = open("res/BASE_Graph{0}_M{1}.dat".format(BASE, m), "w")
-    for _ in range(5):
-        out.write(" {0}".format(0))
-    for e in np.arange(de, finish+de/2, de):
+    out = open("res/BASE_Graph{0}_M{1}_big.dat".format(BASE, m), "w")
+    # for _ in range(5):
+    #     out.write(" {0}".format(0))
+    for e in np.arange(0, finish+de/2, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
         print("M =", m)
@@ -233,7 +219,8 @@ if __name__ == "__main__":
     
     # genError(1e-1, 1e-2)
     
-    genGraph(1e-1, 1e-2, 5)
+    #genGraph(1e-1, 1e-2, M)
+    genGraph(EZ, 1e-2, M)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0, EZ))
