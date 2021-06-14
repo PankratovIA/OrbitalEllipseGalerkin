@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 EZ = 0.1
 T = pi/2
-M = 4
+M = 8
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4])
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     # genError(1e-1, 1e-2)
     
     #genGraph(1e-1, 1e-2, M)
-    genGraph(0.51, 0.1, M)
+    genGraph(0.51, 0.05, M)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0, EZ))
