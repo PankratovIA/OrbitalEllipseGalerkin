@@ -10,8 +10,8 @@ from scipy.integrate import quad, odeint, ode
 import matplotlib.pyplot as plt
 
 EZ = 0.1
-T = pi/3
-M = 6
+T = pi/2
+M = 4
 # lam0 = Quaternion([1, 0, 0, 0])
 # lam0 = Quaternion([0.8, 0, 0.6, 0])
 lam0 = Quaternion([1, 2, 3, 4])
@@ -126,15 +126,15 @@ def genError(finish, de):
     mx = None
     print("T =", T)
     out.write("T = {0}".format(T))
-    Mmin, Mmax = (2, 9)
-    for m in range (Mmin, Mmax):
-        out.write(" {0}".format(m))
-    out.write("\n")
-    for m in range (Mmin, Mmax):
-        outL.write(" {0}".format(m))
-    outL.write("\n")
+    # Mmin, Mmax = (2, 9)
+    # for m in range (Mmin, Mmax):
+    #     out.write(" {0}".format(m))
+    # out.write("\n")
+    # for m in range (Mmin, Mmax):
+    #     outL.write(" {0}".format(m))
+    # outL.write("\n")
 
-    for e in np.arange(de, finish+de/2, de):
+    for e in np.arange(0, finish+de/2, de):
         print(e)
         out.write("\n{0:.2f}".format(e))
         outL.write("\n${0:.2f}$".format(e))
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     # genError(1e-1, 1e-2)
     
     #genGraph(1e-1, 1e-2, M)
-    genGraph(EZ, 1e-2, M)
+    genGraph(0.51, 0.1, M)
     
     print("lam0 = ", lam0, lam0.getNorm())
     print("lam(0) = ", lam(a, 0, EZ))
@@ -246,11 +246,11 @@ if __name__ == "__main__":
     # print(err[:5])
     # print(err[-5:])
     
-    # plt.plot(phi, err, label ='err')
-    # plt.legend(loc='best')
-    # plt.xlabel('phi')
-    # plt.grid()
-    # plt.show()
+    plt.plot(phi, err, label ='err')
+    plt.legend(loc='best')
+    plt.xlabel('phi')
+    plt.grid()
+    plt.show()
     
     print("Cauchy <<<")
     
